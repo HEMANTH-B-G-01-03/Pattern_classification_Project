@@ -37,6 +37,10 @@ from src.variational_em.e_step import (
     VariationalEStep
 )
 
+from src.variational_em.m_step import (
+    MStep
+)
+
 def main():
 
     X, y = load_dataset()
@@ -102,12 +106,29 @@ def main():
     print(
         f"Responsibilities : {len(responsibilities)}"
     )
+    
 
     print("\nFirst K Set")
     print(K_sets[0])
 
     print("\nFirst Responsibility")
     print(responsibilities[0])
+    
+        
+    m_step = MStep()
+
+    new_centers = m_step.run(
+        X_core,
+        K_sets,
+        responsibilities,
+        centers.shape[0]
+    )
+
+    print("\nM-Step")
+    print("------")
+    print(
+        f"Updated Centers Shape : {new_centers.shape}"
+    )
 
 if __name__ == "__main__":
     main()
