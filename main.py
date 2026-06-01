@@ -33,6 +33,9 @@ from src.seeding.afkmc2 import AFKMC2
 from src.variational_em.vcgmm import (
     estimate_initial_variance
 )
+from src.variational_em.e_step import (
+    VariationalEStep
+)
 
 def main():
 
@@ -79,6 +82,32 @@ def main():
         f"Sigma² : {variance:.6f}"
     )
 
+    e_step = VariationalEStep(
+    n_candidates=5
+)
+
+    K_sets, responsibilities = (
+        e_step.run(
+            X_core,
+            centers,
+            variance
+        )
+    )
+
+    print("\nVariational E-Step")
+    print("------------------")
+    print(
+        f"K Sets      : {len(K_sets)}"
+    )
+    print(
+        f"Responsibilities : {len(responsibilities)}"
+    )
+
+    print("\nFirst K Set")
+    print(K_sets[0])
+
+    print("\nFirst Responsibility")
+    print(responsibilities[0])
 
 if __name__ == "__main__":
     main()
