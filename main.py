@@ -30,7 +30,9 @@
 from src.utils.dataset_loader import load_dataset
 from src.coreset.lightweight_coreset import LightweightCoreset
 from src.seeding.afkmc2 import AFKMC2
-
+from src.variational_em.vcgmm import (
+    estimate_initial_variance
+)
 
 def main():
 
@@ -65,6 +67,16 @@ def main():
     print("--------------")
     print(
         f"Centers Shape : {centers.shape}"
+    )
+    variance = estimate_initial_variance(
+    X_core,
+    centers
+)
+
+    print("\nInitial Variance")
+    print("----------------")
+    print(
+        f"Sigma² : {variance:.6f}"
     )
 
 
