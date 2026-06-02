@@ -63,6 +63,82 @@
 
 
 
+# import numpy as np
+
+
+# class VariationalEStep:
+
+#     def __init__(
+#         self,
+#         n_candidates=5
+#     ):
+#         self.n_candidates = n_candidates
+
+#     def run(
+#         self,
+#         X,
+#         centers,
+#         sigma2
+#     ):
+
+#         n_samples = X.shape[0]
+
+#         K_sets = []
+#         responsibilities = []
+
+#         for i in range(n_samples):
+
+#             point = X[i]
+
+#             distances = np.sum(
+#                 (centers - point) ** 2,
+#                 axis=1
+#             )
+
+#             nearest_idx = np.argsort(
+#                 distances
+#             )[:self.n_candidates]
+
+#             K_sets.append(
+#                 nearest_idx
+#             )
+
+#             selected_distances = (
+#                 distances[nearest_idx]
+#             )
+
+#             # Stable softmax
+#             scores = (
+#                 -selected_distances
+#                 /
+#                 (2 * sigma2)
+#             )
+
+#             scores = scores - np.max(
+#                 scores
+#             )
+
+#             probs = np.exp(
+#                 scores
+#             )
+
+#             probs = probs / np.sum(
+#                 probs
+#             )
+
+#             responsibilities.append(
+#                 probs
+#             )
+
+#         return (
+#             K_sets,
+#             responsibilities
+#         )
+
+
+
+
+
 import numpy as np
 
 
@@ -78,7 +154,8 @@ class VariationalEStep:
         self,
         X,
         centers,
-        sigma2
+        sigma2,
+        Gc=None
     ):
 
         n_samples = X.shape[0]
@@ -90,40 +167,69 @@ class VariationalEStep:
 
             point = X[i]
 
+            if Gc is not None:
+
+                candidate_clusters = np.unique(
+                    np.concatenate(Gc)
+                )
+
+            else:
+
+                candidate_clusters = np.arange(
+                    len(centers)
+                )
+
+            candidate_centers = (
+                centers[candidate_clusters]
+            )
+
             distances = np.sum(
-                (centers - point) ** 2,
+                (
+                    candidate_centers
+                    - point
+                ) ** 2,
                 axis=1
             )
 
-            nearest_idx = np.argsort(
+            nearest_local = np.argsort(
                 distances
             )[:self.n_candidates]
+
+            nearest_idx = (
+                candidate_clusters[
+                    nearest_local
+                ]
+            )
 
             K_sets.append(
                 nearest_idx
             )
 
             selected_distances = (
-                distances[nearest_idx]
+                distances[
+                    nearest_local
+                ]
             )
 
-            # Stable softmax
             scores = (
                 -selected_distances
                 /
                 (2 * sigma2)
             )
 
-            scores = scores - np.max(
+            scores = (
                 scores
+                - np.max(scores)
             )
 
             probs = np.exp(
                 scores
             )
 
-            probs = probs / np.sum(
+            probs = (
                 probs
+                /
+                np.sum(probs)
             )
 
             responsibilities.append(

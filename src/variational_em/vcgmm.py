@@ -108,6 +108,10 @@ from src.variational_em.m_step import (
     MStep
 )
 
+from src.variational_em.neighborhood import (
+    NeighborhoodSearch
+)
+
 
 def estimate_initial_variance(
     X,
@@ -140,7 +144,7 @@ class VCGMM:
 
     def __init__(
         self,
-        n_clusters=20,
+        n_clusters=50,
         n_candidates=5,
         max_iter=20,
         tol=1e-4
@@ -167,6 +171,10 @@ class VCGMM:
 
         m_step = MStep()
 
+        neighborhood = NeighborhoodSearch(
+            n_neighbors=5
+        )
+
         previous_centers = centers.copy()
 
         self.movement_history = []
@@ -175,11 +183,16 @@ class VCGMM:
             self.max_iter
         ):
 
+            Gc = neighborhood.build(
+                centers
+            )
+
             K_sets, responsibilities = (
                 e_step.run(
                     X,
                     centers,
-                    sigma2
+                    sigma2,
+                    Gc
                 )
             )
 
