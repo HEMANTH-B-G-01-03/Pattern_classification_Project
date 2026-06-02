@@ -40,13 +40,24 @@ from src.variational_em.e_step import (
 from src.variational_em.m_step import (
     MStep
 )
+from src.variational_em.vcgmm import (
+    VCGMM
+)
+
+from src.utils.visualization import (
+    plot_convergence
+)
+
+from src.variational_em.neighborhood import (
+    NeighborhoodSearch
+)
 
 def main():
 
     X, y = load_dataset()
 
     lwcs = LightweightCoreset(
-        coreset_size=300
+        coreset_size=1000
     )
 
     X_core, weights, indices = (
@@ -63,7 +74,10 @@ def main():
     )
 
     afkmc2 = AFKMC2(
-        n_clusters=20
+        n_clusters=50
+        
+        
+        
     )
 
     centers = afkmc2.initialize(
@@ -79,16 +93,43 @@ def main():
     X_core,
     centers
 )
+    
 
     print("\nInitial Variance")
     print("----------------")
     print(
         f"Sigma² : {variance:.6f}"
     )
+    
+    
+    
+    neighborhood = (
+    NeighborhoodSearch(
+        n_neighbors=5
+    )
+)
+
+    Gc = neighborhood.build(
+        centers
+    )
+
+    print("\nNeighborhood Sets")
+    print("------------------")
+    print(
+        f"Clusters : {len(Gc)}"
+    )
+
+    print(
+        "First Neighborhood:"
+    )
+
+    print(
+        Gc[0]
+    )
 
     e_step = VariationalEStep(
-    n_candidates=5
-)
+        n_candidates=5
+    )
 
     K_sets, responsibilities = (
         e_step.run(
@@ -128,6 +169,29 @@ def main():
     print("------")
     print(
         f"Updated Centers Shape : {new_centers.shape}"
+    )
+    
+    print("\nTraining vc-GMM")
+    print("----------------")
+
+    model = VCGMM(
+        n_clusters=50,
+        n_candidates=5,
+        max_iter=10
+    )
+
+    final_centers = model.fit(
+        X_core,
+        centers,
+        variance
+    )
+
+    print("\nFinal Centers")
+    print(
+        final_centers.shape
+    )
+    plot_convergence(
+    model.movement_history
     )
 
 if __name__ == "__main__":
