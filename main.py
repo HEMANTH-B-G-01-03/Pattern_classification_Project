@@ -216,6 +216,9 @@ from src.variational_em.neighborhood import (
 from src.utils.visualization import (
     plot_convergence
 )
+from src.utils.evaluation import (
+    compute_distortion
+)
 
 
 def main():
@@ -331,6 +334,19 @@ def main():
 
     print("\nFinal Centers")
     print(final_centers.shape)
+    
+    
+    
+    distortion = compute_distortion(
+    X_core,
+    final_centers
+)
+
+    print("\nClustering Objective")
+    print("--------------------")
+    print(
+        f"Distortion : {distortion:.2f}"
+    )
 
     # ==================================================
     # RUNTIME STATISTICS
